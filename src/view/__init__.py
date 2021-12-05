@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, request
 
 from src.authentication import require_token
 from src.db_connection import get_db_connection
@@ -12,14 +12,15 @@ from src.user.query import get_spektrum_user, get_friends, get_friend_requests, 
 VIEW_API = Blueprint('views_api', __name__)
 
 
-@VIEW_API.route('/contactPage/<user_id>', methods=['GET'])
-def get_contact_page(user_id):
+@VIEW_API.route('/contactPage', methods=['POST'])
+def get_contact_page():
+    parameters = request.get_json()
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
                 return _get_contact_page(
                     cursor=cursor,
-                    user_id=user_id
+                    user_id=parameters['userId']
                 )
 
 
@@ -49,14 +50,15 @@ def _get_contact_page(cursor, user_id):
     }
 
 
-@VIEW_API.route('/preGamePage/<user_id>/<opponent_id>', methods=['GET'])
-def get_pre_game_page(user_id, opponent_id):
+@VIEW_API.route('/preGamePage', methods=['POST'])
+def get_pre_game_page():
+    parameters = request.get_json()
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
                 return _get_pre_game_page(
-                    user_id=user_id,
-                    opponent_id=opponent_id,
+                    user_id=parameters['userId'],
+                    opponent_id=parameters['opponentId'],
                     cursor=cursor
                 )
 
@@ -89,15 +91,16 @@ def _get_pre_game_page(cursor, user_id, opponent_id):
     }
 
 
-@VIEW_API.route('/gamePage/<game_id>', methods=['GET'])
-def get_game_page(game_id):
+@VIEW_API.route('/gamePage', methods=['POST'])
+def get_game_page():
+    parameters = request.get_json()
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                user_id = get_player(game_id, cursor)
+                user_id = get_player(parameters['gameId'], cursor)
                 return _get_game_page(
                     user_id=user_id,
-                    game_id=game_id,
+                    game_id=parameters['gameId'],
                     cursor=cursor
                 )
 
