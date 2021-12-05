@@ -14,7 +14,7 @@ def store():
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                user_id = get_player(parameters['gameId'])
+                user_id = get_player(parameters['gameId'], cursor)
                 return _store(
                     cursor=cursor,
                     user_id=user_id,

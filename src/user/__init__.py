@@ -16,7 +16,7 @@ def create_user():
                 return _create_user(
                     cursor=cursor,
                     user_id=parameters['userId'],
-                    user_name=parameters['user_name']
+                    user_name=parameters['userName']
                 )
 
 
@@ -30,7 +30,6 @@ def _create_user(cursor, user_id, user_name):
 
 
 @USER_API.route('/changeUserName', methods=['POST'])
-@require_token()
 def change_user_name():
     parameters = request.get_json()
     with get_db_connection() as connection:
@@ -53,7 +52,6 @@ def _change_user_name(cursor, user_id, new_user_name):
 
 
 @USER_API.route('/changeProfileImageId', methods=['POST'])
-@require_token()
 def change_profile_image_id():
     parameters = request.get_json()
     with get_db_connection() as connection:
@@ -120,7 +118,6 @@ def _accept_friend_request(cursor, user_id, target_user_id):
 
 
 @USER_API.route('/sendChallenge', methods=['POST'])
-@require_token()
 def send_challenge():
     parameters = request.get_json()
     with get_db_connection() as connection:
@@ -133,6 +130,7 @@ def send_challenge():
                 )
 
 
+@require_token(check_user=True)
 def _send_challenge(cursor, user_id, target_user_id):
     return query.send_challenge(
         user_id=user_id,
@@ -142,7 +140,6 @@ def _send_challenge(cursor, user_id, target_user_id):
 
 
 @USER_API.route('/acceptChallenge', methods=['POST'])
-@require_token()
 def accept_challenge():
     parameters = request.get_json()
     with get_db_connection() as connection:
@@ -155,6 +152,7 @@ def accept_challenge():
                 )
 
 
+@require_token(check_user=True)
 def _accept_challenge(cursor, user_id, target_user_id):
     return query.accept_challenge(
         user_id=user_id,

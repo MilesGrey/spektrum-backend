@@ -93,8 +93,18 @@ def get_open_games(user_id, cursor):
         ''',
         {'user_id': user_id}
     )
-    open_games = cursor.fetchall()
-    return [t[0] for t in open_games]
+    own_open_games = cursor.fetchall()
+    cursor.execute(
+        '''
+        SELECT logged_in_player
+        FROM game
+        WHERE other_player = %(user_id)s
+            AND finished = false
+        ''',
+        {'user_id': user_id}
+    )
+    opponent_open_games = cursor.fetchall()
+    return list(set([t[0] for t in own_open_games] + [t[0] for t in opponent_open_games]))
 
 
 def create_user(user_id, user_name, cursor):
@@ -124,7 +134,7 @@ def change_profile_image_id(user_id, new_profile_image_id, cursor):
     cursor.execute(
         '''
         UPDATE spektrum_user
-        SET name = %(new_profile_image_id)s
+        SET profile_image_id = %(new_profile_image_id)s
         WHERE id = %(user_id)s
         ''',
         {'user_id': user_id, 'new_profile_image_id': new_profile_image_id}
