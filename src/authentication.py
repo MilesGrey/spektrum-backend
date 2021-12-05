@@ -17,7 +17,7 @@ def require_token(check_user=False):
                         raise ValueError
 
                 return f(*args, **kwargs)
-            except Exception:
+            except Exception as e:
                 return abort(403, 'Authentication failed.')
         return wrapper
     return require_token_decorator
