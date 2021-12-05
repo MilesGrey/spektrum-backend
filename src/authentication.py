@@ -15,9 +15,9 @@ def require_token(check_user=False):
                 if check_user:
                     if decoded_token['email'] != kwargs['user_id']:
                         raise ValueError
-
-                return f(*args, **kwargs)
             except Exception as e:
                 return abort(403, 'Authentication failed.')
+            return f(*args, **kwargs)
+
         return wrapper
     return require_token_decorator
