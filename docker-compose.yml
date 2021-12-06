@@ -8,6 +8,11 @@ services:
     volumes:
       - .:/app
     environment:
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
       - TYPE=${TYPE}
       - PROJECT_ID=${PROJECT_ID}
       - PRIVATE_KEY_ID=${PRIVATE_KEY_ID}
