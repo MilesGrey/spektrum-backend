@@ -1,3 +1,5 @@
+import os
+
 import psycopg2
 from psycopg2 import pool
 from contextlib import contextmanager
@@ -13,11 +15,11 @@ class DbPool:
             cls.psql_pool = psycopg2.pool.SimpleConnectionPool(
                 1,
                 22,
-                dbname='defaultdb',
-                user='doadmin',
-                password='p3stzq1xpfhnmdlr',
-                host='db-spektrum-do-user-4221323-0.b.db.ondigitalocean.com',
-                port='25060',
+                dbname=os.getenv('DB_NAME'),
+                user=os.getenv('DB_USER'),
+                password=os.getenv('DB_PASSWORD'),
+                host=os.getenv('DB_HOST'),
+                port=os.getenv('DB_PORT'),
                 sslmode='require'
             )
         return cls.psql_pool

@@ -7,3 +7,14 @@ services:
       - "80:80"
     volumes:
       - .:/app
+    environment:
+      - TYPE=${TYPE}
+      - PROJECT_ID=${PROJECT_ID}
+      - PRIVATE_KEY_ID=${PRIVATE_KEY_ID}
+      - PRIVATE_KEY=${PRIVATE_KEY}
+      - CLIENT_EMAIL=${CLIENT_EMAIL}
+      - CLIENT_ID=${CLIENT_ID}
+      - AUTH_URI=${AUTH_URI}
+      - TOKEN_URI=${TOKEN_URI}
+      - AUTH_PROVIDER_X509_CERT_URL=${AUTH_PROVIDER_X509_CERT_URL}
+      - CLIENT_X509_CERT_URL=${CLIENT_X509_CERT_URL}
