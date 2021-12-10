@@ -1,29 +1,27 @@
-from flask import Blueprint, request
+from flask import request
 
-from src.authentication import require_token
+from __main__ import socketio, session_to_user
+
 from src.db_connection import get_db_connection
 from src.game import get_player
 from src.result import query
 
-RESULT_API = Blueprint('result_api', __name__)
 
-
-@RESULT_API.route('/store', methods=['POST'])
-def store():
-    parameters = request.get_json()
+@socketio.on('result_store')
+def store(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                user_id = get_player(parameters['gameId'], cursor)
+                user_id = get_player(json['gameId'], cursor)
+                if user_id != session_to_user[request.sid]:
+                    return 'no-such-game'
                 return _store(
                     cursor=cursor,
-                    user_id=user_id,
-                    parameters=parameters
+                    parameters=json
                 )
 
 
-@require_token(check_user=True)
-def _store(cursor, user_id, parameters):
+def _store(cursor, parameters):
     return query.store(
         game_id=parameters['gameId'],
         excerpt_counter=parameters['excerptCounter'],

@@ -1,6 +1,7 @@
-from flask import Blueprint, request
+from flask import request
 
-from src.authentication import require_token
+from __main__ import socketio, session_to_user
+
 from src.db_connection import get_db_connection
 from src.excerpt.query import get_excerpt_list_for_game
 from src.game.query import get_game, get_player
@@ -9,22 +10,47 @@ from src.speaker.query import fetch_all_speaker_ids
 from src.user.query import get_spektrum_user, get_friends, get_friend_requests, get_pending_friend_requests, \
     get_challenges_sent, get_challenges, get_open_games
 
-VIEW_API = Blueprint('views_api', __name__)
 
-
-@VIEW_API.route('/contactPage', methods=['POST'])
-def get_contact_page():
-    parameters = request.get_json()
+@socketio.on('view_contact_page')
+def get_contact_page(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                return _get_contact_page(
+                test = _get_contact_page(
                     cursor=cursor,
-                    user_id=parameters['userId']
+                    user_id=json['userId'],
+
+                )
+                return test
+
+
+@socketio.on('view_pre_game_page')
+def get_pre_game_page(json):
+    with get_db_connection() as connection:
+        with connection:
+            with connection.cursor() as cursor:
+                user_id = session_to_user[request.sid]
+                return _get_pre_game_page(
+                    user_id=user_id,
+                    opponent_id=json['opponentId'],
+                    cursor=cursor
                 )
 
 
-@require_token(check_user=True)
+@socketio.on('view_game_page')
+def get_game_page(json):
+    with get_db_connection() as connection:
+        with connection:
+            with connection.cursor() as cursor:
+                user_id = get_player(json['gameId'], cursor)
+                if user_id != session_to_user[request.sid]:
+                    return 'no-such-game'
+                return _get_game_page(
+                    game_id=json['gameId'],
+                    cursor=cursor
+                )
+
+
 def _get_contact_page(cursor, user_id):
     user = get_spektrum_user(user_id, cursor)
     friends = get_friends(user_id, cursor)
@@ -50,20 +76,6 @@ def _get_contact_page(cursor, user_id):
     }
 
 
-@VIEW_API.route('/preGamePage', methods=['POST'])
-def get_pre_game_page():
-    parameters = request.get_json()
-    with get_db_connection() as connection:
-        with connection:
-            with connection.cursor() as cursor:
-                return _get_pre_game_page(
-                    user_id=parameters['userId'],
-                    opponent_id=parameters['opponentId'],
-                    cursor=cursor
-                )
-
-
-@require_token(check_user=True)
 def _get_pre_game_page(cursor, user_id, opponent_id):
     opponent = get_spektrum_user(opponent_id, cursor)
 
@@ -91,22 +103,7 @@ def _get_pre_game_page(cursor, user_id, opponent_id):
     }
 
 
-@VIEW_API.route('/gamePage', methods=['POST'])
-def get_game_page():
-    parameters = request.get_json()
-    with get_db_connection() as connection:
-        with connection:
-            with connection.cursor() as cursor:
-                user_id = get_player(parameters['gameId'], cursor)
-                return _get_game_page(
-                    user_id=user_id,
-                    game_id=parameters['gameId'],
-                    cursor=cursor
-                )
-
-
-@require_token(check_user=True)
-def _get_game_page(cursor, user_id, game_id):
+def _get_game_page(cursor, game_id):
     excerpt_list = get_excerpt_list_for_game(game_id, cursor)
     result_list = fetch_results_by_game_id(game_id, cursor)
     return {

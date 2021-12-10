@@ -1,26 +1,16 @@
 import os
 
-from flask import Flask
+from flask import Flask, request
+
+from flask_socketio import SocketIO
 
 import firebase_admin
 from firebase_admin import credentials
 
-from src.excerpt import EXCERPT_API
-from src.game import GAME_API
-from src.result import RESULT_API
-from src.speaker import SPEAKER_API
-from src.user import USER_API
-from src.view import VIEW_API
+from src.authentication import authenticate_user, AuthenticationError
 
 
 app = Flask(__name__)
-
-app.register_blueprint(USER_API, url_prefix='/user')
-app.register_blueprint(EXCERPT_API, url_prefix='/excerpt')
-app.register_blueprint(GAME_API, url_prefix='/game')
-app.register_blueprint(RESULT_API, url_prefix='/result')
-app.register_blueprint(SPEAKER_API, url_prefix='/speaker')
-app.register_blueprint(VIEW_API, url_prefix='/view')
 
 account_info = {
   'type': os.getenv('TYPE'),
@@ -38,7 +28,38 @@ account_info = {
 cred = credentials.Certificate(account_info)
 firebase_admin.initialize_app(cred)
 
+socketio = SocketIO(app, logger=True, engineio_logger=True)
+
+user_to_session = {}
+session_to_user = {}
+
+
+@socketio.on('connect')
+def connect(data):
+    try:
+        user_id = authenticate_user(data['auth']['token'])
+        user_to_session[user_id] = request.sid
+        session_to_user[request.sid] = user_id
+        print(f'{user_id} connected!')
+        return True
+    except AuthenticationError:
+        return False
+
+
+@socketio.on('disconnect')
+def disconnect():
+    user_id = session_to_user.pop(request.sid)
+    user_to_session.pop(user_id)
+    print(f'{user_id} disconnected!')
+
+
+
+from src import view
+from src import user
+from src import result
+from src import game
+from src import excerpt
+
 
 if __name__ == '__main__':
-    from waitress import serve
-    serve(app, host='0.0.0.0', port=80)
+    socketio.run(app, '0.0.0.0', 80)
