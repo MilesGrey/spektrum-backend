@@ -21,17 +21,17 @@ def get_game(user_id, other_player, cursor):
     }
 
 
-def get_player(game_id, cursor):
+def get_players(game_id, cursor):
     cursor.execute(
         '''
-        SELECT logged_in_player
+        SELECT logged_in_player, other_player
         FROM game
         WHERE id = %(game_id)s
         ''',
         {'game_id': game_id}
     )
     game = cursor.fetchone()
-    return game[0]
+    return game[0], game[1]
 
 
 def set_game_finished(game_id, cursor):

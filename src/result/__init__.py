@@ -1,9 +1,11 @@
 from flask import request
 
-from __main__ import socketio, session_to_user
+from __main__ import socketio, session_to_user, user_to_session
+
+from flask_socketio import emit
 
 from src.db_connection import get_db_connection
-from src.game import get_player
+from src.game import get_players
 from src.result import query
 
 
@@ -12,13 +14,20 @@ def store(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                user_id = get_player(json['gameId'], cursor)
+                user_id, target_user_id = get_players(json['gameId'], cursor)
                 if user_id != session_to_user[request.sid]:
                     return 'no-such-game'
-                return _store(
+                response = _store(
                     cursor=cursor,
                     parameters=json
                 )
+    try:
+        target_user_sid = user_to_session[target_user_id]
+        emit('result_stored', {'userId': user_id, 'distance': json['distance']}, broadcast=True, to=target_user_sid)
+        emit('own_result_stored', {'targetUserId': target_user_id, 'distance': json['distance']})
+    except KeyError:
+        pass
+    return response
 
 
 def _store(cursor, parameters):

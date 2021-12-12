@@ -1,6 +1,7 @@
 from flask import request
+from flask_socketio import emit
 
-from __main__ import socketio
+from __main__ import socketio, user_to_session
 
 from src.db_connection import get_db_connection
 from src.user import query
@@ -48,11 +49,17 @@ def send_friend_request(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                return _send_friend_request(
+                response = _send_friend_request(
                     cursor=cursor,
                     user_id=json['userId'],
                     target_user_id=json['targetUserId']
                 )
+    try:
+        target_user_sid = user_to_session[json['targetUserId']]
+        emit('new_friend_request', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
+    except KeyError:
+        pass
+    return response
 
 
 @socketio.on('user_accept_friend_request')
@@ -60,11 +67,17 @@ def accept_friend_request(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                return _accept_friend_request(
+                response = _accept_friend_request(
                     user_id=json['userId'],
                     target_user_id=json['targetUserId'],
                     cursor=cursor
                 )
+    try:
+        target_user_sid = user_to_session[json['targetUserId']]
+        emit('friend_request_accepted', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
+    except KeyError:
+        pass
+    return response
 
 
 @socketio.on('user_send_challenge')
@@ -72,11 +85,17 @@ def send_challenge(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                return _send_challenge(
+                response = _send_challenge(
                     user_id=json['userId'],
                     target_user_id=json['targetUserId'],
                     cursor=cursor
                 )
+    try:
+        target_user_sid = user_to_session[json['targetUserId']]
+        emit('new_challenge', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
+    except KeyError:
+        pass
+    return response
 
 
 @socketio.on('user_accept_challenge')
@@ -84,11 +103,17 @@ def accept_challenge(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                return _accept_challenge(
+                response = _accept_challenge(
                     user_id=json['userId'],
                     target_user_id=json['targetUserId'],
                     cursor=cursor
                 )
+    try:
+        target_user_sid = user_to_session[json['targetUserId']]
+        emit('challenge_accepted', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
+    except KeyError:
+        pass
+    return response
 
 
 def _create_user(cursor, user_id, user_name):
