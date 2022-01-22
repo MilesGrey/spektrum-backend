@@ -1,3 +1,7 @@
 .idea
 
 serviceAccountKey.json
+
+.env
+
+__pycache__
