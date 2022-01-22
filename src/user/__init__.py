@@ -32,14 +32,13 @@ def change_user_name(json):
 
 
 @socketio.on('user_change_profile_image_id')
-def change_profile_image_id():
-    parameters = request.get_json()
+def change_profile_image_id(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
                 return _change_profile_image_id(
-                    user_id=parameters['userId'],
-                    new_profile_image_id=parameters['newProfileImageId'],
+                    user_id=json['userId'],
+                    new_profile_image_id=json['newProfileImageId'],
                     cursor=cursor
                 )
 
