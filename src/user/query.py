@@ -1,6 +1,19 @@
 from src.excerpt.query import get_random_excerpt_id_list
 
 
+def register_notification_token(user_id, notification_token, cursor):
+    cursor.execute(
+        '''
+        INSERT INTO notification_registration(user_id, notification_token)
+        VALUES (%(user_id)s, %(notification_token)s)
+        ON CONFLICT (user_id)
+        DO UPDATE
+        SET notification_token = %(notification_token)s, timestamp = current_timestamp
+        ''',
+        {'user_id': user_id, 'notification_token': notification_token}
+    )
+
+
 def get_spektrum_user(user_id, cursor):
     cursor.execute(
         '''

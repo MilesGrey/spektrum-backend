@@ -6,6 +6,18 @@ from src.db_connection import get_db_connection
 from src.user import query
 
 
+@socketio.on('register_notification_token')
+def register_notification_token(json):
+    with get_db_connection() as connection:
+        with connection:
+            with connection.cursor() as cursor:
+                return _register_notification_token(
+                    cursor=cursor,
+                    user_id=json['userId'],
+                    notification_token=json['notificationToken']
+                )
+
+
 @socketio.on('get_spektrum_user')
 def get_spektrum_user(json):
     with get_db_connection() as connection:
@@ -123,6 +135,14 @@ def accept_challenge(json):
     except KeyError:
         pass
     return response
+
+
+def _register_notification_token(cursor, user_id, notification_token):
+    return query.register_notification_token(
+        user_id=user_id,
+        notification_token=notification_token,
+        cursor=cursor
+    )
 
 
 def _get_spektrum_user(cursor, user_id):
