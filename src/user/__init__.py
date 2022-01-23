@@ -1,10 +1,20 @@
-from flask import request
 from flask_socketio import emit
 
 from __main__ import socketio, user_to_session
 
 from src.db_connection import get_db_connection
 from src.user import query
+
+
+@socketio.on('get_spektrum_user')
+def get_spektrum_user(json):
+    with get_db_connection() as connection:
+        with connection:
+            with connection.cursor() as cursor:
+                return _get_spektrum_user(
+                    cursor=cursor,
+                    user_id=json['userId'],
+                )
 
 
 @socketio.on('user_create_user')
@@ -113,6 +123,13 @@ def accept_challenge(json):
     except KeyError:
         pass
     return response
+
+
+def _get_spektrum_user(cursor, user_id):
+    return query.get_spektrum_user(
+        user_id=user_id,
+        cursor=cursor
+    )
 
 
 def _create_user(cursor, user_id, user_name):
