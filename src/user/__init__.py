@@ -11,7 +11,7 @@ def register_notification_token(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                _register_notification_token(
+                return _register_notification_token(
                     cursor=cursor,
                     user_id=json['userId'],
                     notification_token=json['notificationToken']
@@ -138,7 +138,7 @@ def accept_challenge(json):
 
 
 def _register_notification_token(cursor, user_id, notification_token):
-    query.register_notification_token(
+    return query.register_notification_token(
         user_id=user_id,
         notification_token=notification_token,
         cursor=cursor

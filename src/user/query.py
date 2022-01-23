@@ -12,6 +12,10 @@ def register_notification_token(user_id, notification_token, cursor):
         ''',
         {'user_id': user_id, 'notification_token': notification_token}
     )
+    return {
+        'userId': user_id,
+        'notificationToken': notification_token,
+    }
 
 
 def get_spektrum_user(user_id, cursor):
