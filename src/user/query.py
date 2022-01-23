@@ -28,7 +28,7 @@ def get_notification_token(user_id, cursor):
         {'user_id': user_id}
     )
     notification_token = cursor.fetchall()
-    return notification_token[0]
+    return notification_token[0][0]
 
 
 def get_spektrum_user(user_id, cursor):

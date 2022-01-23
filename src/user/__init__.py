@@ -2,7 +2,7 @@ from flask_socketio import emit
 
 from __main__ import socketio, user_to_session
 
-from push_notifications import send_notification_to_token
+from src.push_notifications import send_notification_to_token
 from src.db_connection import get_db_connection
 from src.user import query
 
@@ -77,7 +77,7 @@ def send_friend_request(json):
                     target_user_id=json['targetUserId']
                 )
                 target_notification_token = query.get_notification_token(
-                    user_id=json['targetUserid'],
+                    user_id=json['targetUserId'],
                     cursor=cursor
                 )
     try:
@@ -122,7 +122,7 @@ def send_challenge(json):
                     cursor=cursor
                 )
                 target_notification_token = query.get_notification_token(
-                    user_id=json['targetUserid'],
+                    user_id=json['targetUserId'],
                     cursor=cursor
                 )
     try:
