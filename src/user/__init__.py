@@ -2,6 +2,7 @@ from flask_socketio import emit
 
 from __main__ import socketio, user_to_session
 
+from push_notifications import send_notification_to_token
 from src.db_connection import get_db_connection
 from src.user import query
 
@@ -75,11 +76,20 @@ def send_friend_request(json):
                     user_id=json['userId'],
                     target_user_id=json['targetUserId']
                 )
+                target_notification_token = query.get_notification_token(
+                    user_id=json['targetUserid'],
+                    cursor=cursor
+                )
     try:
         target_user_sid = user_to_session[json['targetUserId']]
         emit('new_friend_request', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
     except KeyError:
         pass
+    send_notification_to_token(
+        registration_token=target_notification_token,
+        title='neue freundschaftsanfrage',
+        body=f'{json["userId"]} hat dir eine freundschaftsanfrage geschickt.'
+    )
     return response
 
 
@@ -111,11 +121,20 @@ def send_challenge(json):
                     target_user_id=json['targetUserId'],
                     cursor=cursor
                 )
+                target_notification_token = query.get_notification_token(
+                    user_id=json['targetUserid'],
+                    cursor=cursor
+                )
     try:
         target_user_sid = user_to_session[json['targetUserId']]
         emit('new_challenge', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
     except KeyError:
         pass
+    send_notification_to_token(
+        registration_token=target_notification_token,
+        title='neue herausforderung',
+        body=f'{json["userId"]} hat dich zu einem spiel herausgefordert.'
+    )
     return response
 
 

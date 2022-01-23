@@ -18,6 +18,19 @@ def register_notification_token(user_id, notification_token, cursor):
     }
 
 
+def get_notification_token(user_id, cursor):
+    cursor.execute(
+        '''
+        SELECT notification_token
+        FROM notification_registration
+        WHERE user_id = %(user_id)s
+        ''',
+        {'user_id': user_id}
+    )
+    notification_token = cursor.fetchall()
+    return notification_token[0]
+
+
 def get_spektrum_user(user_id, cursor):
     cursor.execute(
         '''
