@@ -176,6 +176,20 @@ def send_friend_request(user_id, target_user_id, cursor):
     cursor.execute(
         '''
         SELECT EXISTS(
+          SELECT logged_in_user, user_friend
+          FROM friend
+          WHERE logged_in_user = %(user_id)s
+            AND user_friend = %(target_user_id)s
+        )
+        ''',
+        {'user_id': user_id, 'target_user_id': target_user_id}
+    )
+    is_already_friend = cursor.fetchone()[0]
+    if is_already_friend:
+        return False
+    cursor.execute(
+        '''
+        SELECT EXISTS(
           SELECT sender, receiver
           FROM friend_request
           WHERE sender = %(target_user_id)s
@@ -259,6 +273,21 @@ def accept_friend_request(user_id, target_user_id, cursor):
 
 
 def send_challenge(user_id, target_user_id, cursor):
+    cursor.execute(
+        '''
+        SELECT EXISTS(
+            SELECT logged_in_player, other_player
+            FROM game
+            WHERE logged_in_player = %(user_id)s
+                AND other_player = %(target_user_id)s
+                AND finished = false
+        )
+        ''',
+        {'user_id': user_id, 'target_user_id': target_user_id}
+    )
+    is_already_active_game = cursor.fetchone()[0]
+    if is_already_active_game:
+        return False
     cursor.execute(
         '''
         SELECT EXISTS(
