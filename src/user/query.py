@@ -184,8 +184,20 @@ def send_friend_request(user_id, target_user_id, cursor):
         ''',
         {'user_id': user_id, 'target_user_id': target_user_id}
     )
-    is_already_requested = cursor.fetchone()[0]
-    if not is_already_requested:
+    is_already_requested_by_target = cursor.fetchone()[0]
+    cursor.execute(
+        '''
+        SELECT EXISTS(
+          SELECT sender, receiver
+          FROM friend_request
+          WHERE sender = %(user_id)s
+            AND receiver = %(target_user_id)s
+        )
+        ''',
+        {'user_id': user_id, 'target_user_id': target_user_id}
+    )
+    is_already_sent = cursor.fetchone()[0]
+    if not is_already_requested_by_target and not is_already_sent:
         cursor.execute(
             '''
             INSERT INTO friend_request (sender, receiver)
@@ -193,7 +205,8 @@ def send_friend_request(user_id, target_user_id, cursor):
             ''',
             {'user_id': user_id, 'target_user_id': target_user_id}
         )
-    else:
+        return True
+    elif is_already_requested_by_target:
         cursor.execute(
             '''
             DELETE FROM friend_request
@@ -216,7 +229,7 @@ def send_friend_request(user_id, target_user_id, cursor):
             ''',
             {'user_id': user_id, 'target_user_id': target_user_id}
         )
-    return {}
+    return False
 
 
 def accept_friend_request(user_id, target_user_id, cursor):
@@ -258,7 +271,19 @@ def send_challenge(user_id, target_user_id, cursor):
         {'user_id': user_id, 'target_user_id': target_user_id}
     )
     is_already_challenged = cursor.fetchone()[0]
-    if not is_already_challenged:
+    cursor.execute(
+        '''
+        SELECT EXISTS(
+            SELECT sender, receiver
+            FROM game_request
+            WHERE sender = %(user_id)s
+                AND receiver = %(target_user_id)s
+        )
+        ''',
+        {'user_id': user_id, 'target_user_id': target_user_id}
+    )
+    is_already_sent = cursor.fetchone()[0]
+    if not is_already_challenged and not is_already_sent:
         cursor.execute(
             '''
             INSERT INTO game_request (sender, receiver)
@@ -266,7 +291,8 @@ def send_challenge(user_id, target_user_id, cursor):
             ''',
             {'user_id': user_id, 'target_user_id': target_user_id}
         )
-    else:
+        return True
+    elif is_already_challenged:
         cursor.execute(
             '''
             DELETE FROM game_request
@@ -330,7 +356,7 @@ def send_challenge(user_id, target_user_id, cursor):
                         'fragment': excerpt['fragment'],
                     }
                 )
-    return {}
+    return False
 
 
 def accept_challenge(user_id, target_user_id, cursor):

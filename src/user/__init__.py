@@ -71,7 +71,7 @@ def send_friend_request(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                response = _send_friend_request(
+                is_added = _send_friend_request(
                     cursor=cursor,
                     user_id=json['userId'],
                     target_user_id=json['targetUserId']
@@ -80,17 +80,18 @@ def send_friend_request(json):
                     user_id=json['targetUserId'],
                     cursor=cursor
                 )
-    try:
-        target_user_sid = user_to_session[json['targetUserId']]
-        emit('new_friend_request', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
-    except KeyError:
-        pass
-    send_notification_to_token(
-        registration_token=target_notification_token,
-        title='neue freundschaftsanfrage',
-        body=f'{json["userId"]} hat dir eine freundschaftsanfrage geschickt.'
-    )
-    return response
+    if is_added:
+        try:
+            target_user_sid = user_to_session[json['targetUserId']]
+            emit('new_friend_request', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
+        except KeyError:
+            pass
+        send_notification_to_token(
+            registration_token=target_notification_token,
+            title='neue freundschaftsanfrage',
+            body=f'{json["userId"]} hat dir eine freundschaftsanfrage geschickt.'
+        )
+    return {}
 
 
 @socketio.on('user_accept_friend_request')
@@ -116,7 +117,7 @@ def send_challenge(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                response = _send_challenge(
+                is_added = _send_challenge(
                     user_id=json['userId'],
                     target_user_id=json['targetUserId'],
                     cursor=cursor
@@ -125,17 +126,18 @@ def send_challenge(json):
                     user_id=json['targetUserId'],
                     cursor=cursor
                 )
-    try:
-        target_user_sid = user_to_session[json['targetUserId']]
-        emit('new_challenge', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
-    except KeyError:
-        pass
-    send_notification_to_token(
-        registration_token=target_notification_token,
-        title='neue herausforderung',
-        body=f'{json["userId"]} hat dich zu einem spiel herausgefordert.'
-    )
-    return response
+    if is_added:
+        try:
+            target_user_sid = user_to_session[json['targetUserId']]
+            emit('new_challenge', {'userId': json['userId']}, broadcast=True, to=target_user_sid)
+        except KeyError:
+            pass
+        send_notification_to_token(
+            registration_token=target_notification_token,
+            title='neue herausforderung',
+            body=f'{json["userId"]} hat dich zu einem spiel herausgefordert.'
+        )
+    return {}
 
 
 @socketio.on('user_accept_challenge')
