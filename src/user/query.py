@@ -137,6 +137,26 @@ def get_open_games(user_id, cursor):
     return list(set([t[0] for t in own_open_games] + [t[0] for t in opponent_open_games]))
 
 
+def get_finished_games(user_id, cursor):
+    cursor.execute(
+        '''
+        SELECT id, other_player
+        FROM game
+        WHERE logged_in_player = %(user_id)s
+            AND finished = true
+        ''',
+        {'user_id': user_id}
+    )
+    finished_games = cursor.fetchall()
+    return [
+        {
+            'gameId': game[0],
+            'otherPlayer': game[1]
+        }
+        for game in finished_games
+    ]
+
+
 def create_user(user_id, user_name, cursor):
     cursor.execute(
         '''

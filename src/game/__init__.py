@@ -5,7 +5,7 @@ from __main__ import socketio, session_to_user, user_to_session
 
 from src.db_connection import get_db_connection
 from src.game import query
-from src.game.query import get_players, get_game
+from src.game.query import get_players, get_latest_game
 
 
 @socketio.on('game_set_game_finished')
@@ -20,7 +20,7 @@ def set_game_finished(json):
                     cursor=cursor,
                     game_id=json['gameId']
                 )
-                both_finished_game = get_game(target_user_id, user_id, cursor)['isFinished']
+                both_finished_game = get_latest_game(target_user_id, user_id, cursor)['isFinished']
     if both_finished_game:
         try:
             target_user_sid = user_to_session[target_user_id]

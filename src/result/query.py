@@ -22,17 +22,21 @@ def fetch_results_by_game_id(game_id, cursor):
     ]
 
 
-def get_current_total_distance(game_id, cursor):
+def get_game_info(game, cursor):
     cursor.execute(
         '''
         SELECT distance
         FROM result
         WHERE game_id = %(game_id)s
         ''',
-        {'game_id': game_id}
+        {'game_id': game['gameId']}
     )
     distances = cursor.fetchall()
-    return float(sum([distance[0] for distance in distances]))
+    return {
+        'gameId': game['gameId'],
+        'isFinished': game['gameId'],
+        'totalDistance': float(sum([distance[0] for distance in distances]))
+    }
 
 
 def store(game_id, excerpt_counter, user_id, socio_cultural_coordinate, socio_economic_coordinate, distance, cursor):
