@@ -105,6 +105,7 @@ def _get_pre_game_page(cursor, user_id, opponent_id):
 
 def _get_history_game_page(cursor, game_id):
     user_game = get_game(game_id, cursor)
+    opponent = get_spektrum_user(user_game['otherPlayer'], cursor)
     opponent_game = get_game_by_creation(
         logged_in_player=user_game['otherPlayer'],
         other_player=user_game['loggedInPlayer'],
@@ -115,7 +116,7 @@ def _get_history_game_page(cursor, game_id):
     opponent_game_info = get_game_info(opponent_game, cursor)
 
     return {
-        'opponent': user_game['otherPlayer'],
+        'opponent': opponent,
         'userGame': user_game_info,
         'opponentGame': opponent_game_info
     }
