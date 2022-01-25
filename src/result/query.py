@@ -34,7 +34,7 @@ def get_game_info(game, cursor):
     distances = cursor.fetchall()
     return {
         'gameId': game['gameId'],
-        'isFinished': game['gameId'],
+        'isFinished': game['isFinished'],
         'totalDistance': float(sum([distance[0] for distance in distances]))
     }
 
