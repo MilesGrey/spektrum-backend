@@ -36,11 +36,10 @@ def get_pre_game_page(json):
 
 
 @socketio.on('view_history_game_page')
-def get_pre_game_page(json):
+def get_history_game_page(json):
     with get_db_connection() as connection:
         with connection:
             with connection.cursor() as cursor:
-                user_id = session_to_user[request.sid]
                 return _get_history_game_page(
                     game_id=json['gameId'],
                     cursor=cursor
