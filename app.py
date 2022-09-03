@@ -59,6 +59,7 @@ from src import user
 from src import result
 from src import game
 from src import excerpt
+from src import image
 
 
 if __name__ == '__main__':
