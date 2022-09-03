@@ -8,6 +8,4 @@ def get_copyright(speaker_id, cursor):
         {'speaker_id': speaker_id}
     )
     game = cursor.fetchone()
-    return {
-        'copyright': game[0],
-    }
+    return game[0]
