@@ -6,7 +6,7 @@ from src.db_connection import get_db_connection
 from src.excerpt.query import get_excerpt_list_for_game
 from src.game.query import get_latest_game, get_players, get_game, get_game_by_creation
 from src.result.query import fetch_results_by_game_id, get_game_info
-from src.speaker.query import fetch_all_speaker_ids
+from src.speaker.query import fetch_all_speaker_ids_with_image
 from src.user.query import get_spektrum_user, get_friends, get_friend_requests, get_pending_friend_requests, \
     get_challenges_sent, get_challenges, get_open_games, get_finished_games
 
@@ -69,7 +69,7 @@ def _get_contact_page(cursor, user_id):
     challenges = get_challenges(user_id, cursor)
     open_games = get_open_games(user_id, cursor)
     finished_games = get_finished_games(user_id, cursor)
-    speaker_id_list = fetch_all_speaker_ids(cursor)
+    speaker_id_list = fetch_all_speaker_ids_with_image(cursor)
     contact_list_with_requests = []
     contact_list_with_requests.extend(friend_requests)
     contact_list_with_requests.extend(pending_friend_requests)
