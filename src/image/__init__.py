@@ -4,6 +4,9 @@ from src.db_connection import get_db_connection
 from src.image.query import get_copyright
 
 
+IMAGES_DIRECTORY = 'portrait_id'
+
+
 @socketio.on('image_politician')
 def get_politician_image(json):
     return _get_politician_image(
@@ -14,7 +17,7 @@ def get_politician_image(json):
 def _get_politician_image(speaker_id):
     image_data = None
     if speaker_id.isdigit():
-        with open(f'{speaker_id}.jpg', 'rb') as f:
+        with open(f'{IMAGES_DIRECTORY}/{speaker_id}.jpg', 'rb') as f:
             image_data = f.read()
     return image_data
 
