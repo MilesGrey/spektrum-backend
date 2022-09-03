@@ -5,3 +5,7 @@ serviceAccountKey.json
 .env
 
 __pycache__
+
+portrait_id
+
+certificates
