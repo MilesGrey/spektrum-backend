@@ -19,7 +19,9 @@ def _get_politician_image(speaker_id):
     if speaker_id.isdigit():
         with open(f'{IMAGES_DIRECTORY}/{speaker_id}.jpg', 'rb') as f:
             image_data = f.read()
-    return image_data
+    return {
+        'image': image_data,
+    }
 
 
 @socketio.on('image_copyright')
@@ -34,4 +36,6 @@ def get_copyright_image(json):
 
 
 def _get_copyright_image(cursor, speaker_id):
-    return get_copyright(speaker_id, cursor)
+    return {
+        'copyright': get_copyright(speaker_id, cursor),
+    }
